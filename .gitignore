@@ -1,0 +1,14 @@
+# Ambiente
+.env
+
+# Binários
+todo-go
+todo-go.exe
+
+# Cache do Go
+/vendor/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
