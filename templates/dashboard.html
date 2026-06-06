@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-do Go — Dashboard</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="dashboard-page">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-logo">
+        <div class="header-logo-icon">✅</div>
+        To-do Go
+      </div>
+      <div class="header-user">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <span class="user-name" id="user-name">Carregando...</span>
+        <button class="btn btn-secondary btn-sm" onclick="logout()">Sair</button>
+      </div>
+    </header>
+
+    <div class="layout">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+
+        <!-- Stats -->
+        <div class="stats-bar">
+          <h3>Resumo</h3>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-num" id="stat-total">0</span>
+              <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num" id="stat-done">0</span>
+              <span class="stat-label">Feitas</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status filters -->
+        <div class="sidebar-section">
+          <p class="sidebar-section-title">Filtrar por status</p>
+          <nav class="sidebar-nav" id="status-nav">
+            <button class="sidebar-link active" onclick="setStatusFilter('all', this)">
+              <span class="sidebar-link-left">
+                <span>📋</span><span>Todas</span>
+              </span>
+              <span class="sidebar-badge" id="count-all">0</span>
+            </button>
+            <button class="sidebar-link" onclick="setStatusFilter('pending', this)">
+              <span class="sidebar-link-left">
+                <span>⏳</span><span>Pendentes</span>
+              </span>
+              <span class="sidebar-badge" id="count-pending">0</span>
+            </button>
+            <button class="sidebar-link" onclick="setStatusFilter('done', this)">
+              <span class="sidebar-link-left">
+                <span>✅</span><span>Concluídas</span>
+              </span>
+              <span class="sidebar-badge" id="count-done">0</span>
+            </button>
+          </nav>
+        </div>
+
+        <!-- Categories -->
+        <div class="sidebar-section">
+          <div class="sidebar-categories-header">
+            <p class="sidebar-section-title" style="margin-bottom:0">Categorias</p>
+            <button class="btn-add-category" title="Nova categoria" onclick="openCategoryModal()">+</button>
+          </div>
+          <nav class="sidebar-nav" id="category-nav">
+            <!-- Populated by JS -->
+          </nav>
+        </div>
+
+      </aside>
+
+      <!-- Main -->
+      <main class="main">
+        <div class="main-header">
+          <div>
+            <h2 id="main-title">Todas as tarefas <span class="task-count" id="task-count-label"></span></h2>
+          </div>
+          <button class="btn btn-primary" onclick="openTaskModal()">
+            + Nova tarefa
+          </button>
+        </div>
+
+        <!-- Filter tabs (status) — inside main -->
+        <div class="filter-tabs" id="filter-tabs">
+          <button class="filter-tab active" data-status="all"     onclick="setStatusFilter('all', null, this)">Todas</button>
+          <button class="filter-tab"        data-status="pending" onclick="setStatusFilter('pending', null, this)">Pendentes</button>
+          <button class="filter-tab"        data-status="done"    onclick="setStatusFilter('done', null, this)">Concluídas</button>
+        </div>
+
+        <!-- Skeleton loaders -->
+        <div id="skeleton-list">
+          <div class="skeleton skeleton-card"></div>
+          <div class="skeleton skeleton-card"></div>
+          <div class="skeleton skeleton-card"></div>
+        </div>
+
+        <!-- Task list -->
+        <div class="task-list" id="task-list" style="display:none"></div>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="empty-state" style="display:none">
+          <div class="empty-state-icon">📭</div>
+          <h3>Nenhuma tarefa encontrada</h3>
+          <p>Crie sua primeira tarefa clicando no botão acima.</p>
+          <button class="btn btn-primary" onclick="openTaskModal()">+ Criar tarefa</button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Task ===== -->
+  <div class="modal-overlay" id="task-modal-overlay" onclick="closeTaskModal(event)">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3 id="task-modal-title">Nova tarefa</h3>
+        <button class="modal-close" onclick="closeTaskModal()">&times;</button>
+      </div>
+      <form onsubmit="submitTaskForm(event)">
+        <div class="form-group">
+          <label for="task-title-input">Título *</label>
+          <input id="task-title-input" type="text" placeholder="O que precisa ser feito?" required maxlength="200">
+        </div>
+        <div class="form-group">
+          <label for="task-desc-input">Descrição</label>
+          <textarea id="task-desc-input" placeholder="Detalhes opcionais..." maxlength="1000"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="task-category-select">Categoria</label>
+          <select id="task-category-select">
+            <option value="0">Sem categoria</option>
+          </select>
+        </div>
+        <div class="form-error" id="task-modal-error"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeTaskModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="task-submit-btn">Salvar tarefa</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Category ===== -->
+  <div class="modal-overlay" id="cat-modal-overlay" onclick="closeCategoryModal(event)">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3>Nova categoria</h3>
+        <button class="modal-close" onclick="closeCategoryModal()">&times;</button>
+      </div>
+      <form onsubmit="submitCategoryForm(event)">
+        <div class="form-group">
+          <label for="cat-name-input">Nome da categoria *</label>
+          <input id="cat-name-input" type="text" placeholder="Ex: Trabalho, Pessoal, Estudos..." required maxlength="100">
+        </div>
+        <div class="form-error" id="cat-modal-error"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Criar categoria</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Confirm delete ===== -->
+  <div class="modal-overlay" id="confirm-modal-overlay">
+    <div class="modal" role="dialog" aria-modal="true" style="max-width:380px">
+      <div class="modal-header">
+        <h3 id="confirm-title">Confirmar exclusão</h3>
+        <button class="modal-close" onclick="closeConfirmModal()">&times;</button>
+      </div>
+      <p class="confirm-message" id="confirm-message">Tem certeza que deseja excluir este item?</p>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancelar</button>
+        <button class="btn btn-danger" id="confirm-action-btn">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

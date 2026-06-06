@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(cd \"c:\\\\to-do-go\"; $env:PATH = $env:PATH + \";C:\\\\Program Files\\\\Go\\\\bin;C:\\\\Go\\\\bin\"; go mod tidy 2>&1)",
+      "PowerShell(cd \"c:\\\\to-do-go\"; $env:PATH = $env:PATH + \";C:\\\\Program Files\\\\Go\\\\bin;C:\\\\Go\\\\bin\"; go build ./... 2>&1)"
+    ]
+  }
+}
